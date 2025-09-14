@@ -1,35 +1,42 @@
 "use client";
+import React, { createContext, useContext, useState, useEffect } from "react";
 
-import { useEffect, useState, ReactNode } from "react";
+type ThemeContextType = {
+  darkMode: boolean;
+  toggleDarkMode: () => void;
+  setDarkMode: (value: boolean) => void;
+};
 
-interface ThemeProviderProps {
-  children: ReactNode;
-  defaultTheme?: "light" | "dark";
-  attribute?: "class" | "data-theme";
-  forcedTheme?: "light" | "dark";
-}
+const ThemeContext = createContext<ThemeContextType>({
+  darkMode: false,
+  toggleDarkMode: () => {},
+  setDarkMode: () => {},
+});
 
-export function ThemeProvider({
-  children,
-  defaultTheme = "dark",
-  attribute = "class",
-  forcedTheme,
-}: ThemeProviderProps) {
-  const [mounted, setMounted] = useState(false);
+export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
+  const [darkMode, setDarkMode] = useState(false);
 
+  // On mount, read from localStorage
   useEffect(() => {
-    setMounted(true);
-    const root = document.documentElement;
-    const theme = forcedTheme || defaultTheme;
-    if (attribute === "class") {
-      root.classList.toggle("dark", theme === "dark");
-    } else {
-      root.setAttribute(attribute, theme);
+    const saved = localStorage.getItem("darkMode");
+    if (saved) {
+      setDarkMode(saved === "true");
     }
-  }, [forcedTheme, defaultTheme, attribute]);
+  }, []);
 
-  // Only render children after mounted to avoid hydration mismatch
-  if (!mounted) return null;
+  // Update <html> and localStorage whenever darkMode changes
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", darkMode);
+    localStorage.setItem("darkMode", darkMode.toString());
+  }, [darkMode]);
 
-  return <>{children}</>;
-}
+  const toggleDarkMode = () => setDarkMode(!darkMode);
+
+  return (
+    <ThemeContext.Provider value={{ darkMode, toggleDarkMode, setDarkMode }}>
+      {children}
+    </ThemeContext.Provider>
+  );
+};
+
+export const useTheme = () => useContext(ThemeContext);
