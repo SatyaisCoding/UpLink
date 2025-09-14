@@ -22,6 +22,7 @@ app.get("/api/v1/website/status", authMiddleware, async (req, res) => {
     const websiteId = req.query.websiteId! as string;
     const userId = req.userId;
 
+    
     const data = await prismaClient.website.findFirst({
         where: { id: websiteId, userId, disabled: false },
         include: { ticks: true }
@@ -60,6 +61,6 @@ app.post("/api/v1/payout/:validatorId", async (req, res) => {
    // todo
 });
 
-app.listen(3000, () => {
-    console.log("Server running on http://localhost:3000");
+app.listen(8080, () => {
+    console.log("Server running on http://localhost:8080");
 });
