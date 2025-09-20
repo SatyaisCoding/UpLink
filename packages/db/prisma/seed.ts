@@ -13,7 +13,7 @@ async function seed() {
 
     const website = await prismaClient.website.create({
         data: {
-            url: "https://test.com",
+            url: "https://google.com",
             userId: USER_ID
         }
     })
